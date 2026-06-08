@@ -15,6 +15,7 @@ const DEMO_WORDS = {
 
 }
 
+
 /**
  * 
  * This is the main App component that manages overall game state and screen transitions.
@@ -37,6 +38,63 @@ function App() {
   // Build the full board - submitted guesses plus empty rows to fill up to 6
   const MAX_GUESSES = 6
 
+
+  /**
+   * 
+   * Checks a guess against the target word and returns tile statuses.
+   * Uses two passes to correctly handle duplicate letters.
+   * 
+   * @param { string } guess - The player's guessed word (uppercase).
+   * @param { string } target - The target word to guess (uppercase).
+   * @returns { Array } - Array of { letter, status } objects.
+   * 
+   */
+
+  const checkGuess = ( guess, target ) => {
+
+    // Convert target to array so we can "claim" letters as we match them
+    const targetLetters = target.split( "" )
+    const result = Array.from( { length: guess.length } ).map( () => ( { letter: "", status: "absent" } ) )
+
+    // Pass 1 - find correct letters (right letter, right position)
+    guess.split( "" ).forEach( ( letter, i ) => {
+
+      // Mark as correct if letter matches target in the same position
+      if ( letter === targetLetters[i] ) {
+
+        result[i] = { letter, status: "correct" }
+        targetLetters[i] = null // Claim this letter so it can't be matched again
+
+      }
+
+    } )
+
+    // Pass 2 - find present letters (right letter, wrong position)
+    guess.split( "" ).forEach( ( letter, i ) => {
+
+      // Skip letters already marked correct in pass 1
+      if ( result[i].status === "correct" ) return
+
+      const foundIndex = targetLetters.indexOf( letter )
+
+      // Mark as present if letter exists elsewhere in target
+      if ( foundIndex !== -1 ) {
+
+        result[i] = { letter, status: "present" }
+        targetLetters[ foundIndex ] = null // Claim this letter so it can't be matched again
+
+      } else { // Mark as absent if letter is not found in target at all
+
+        result[i] = { letter, status: "absent" }
+
+      }
+
+    } )
+
+    return result
+
+  }
+
   /**
    * 
    * Handles a key press from either the on-screen or physical keyboard.
@@ -55,10 +113,33 @@ function App() {
 
       setCurrentGuess( ( prev ) => prev.slice( 0, -1 ) )
 
-    } else if ( key === "ENTER" ) { // Handles Enter: submit guess if it has the correct length
+    } else if ( key === "ENTER" ) { // Handles Enter: submit the guess if it's long enough
 
-      // TODO: validate and submit guess (WRDL-19)
-      console.log( "Submit:", currentGuess )
+      // Reject if guess is too short
+      if ( currentGuess.length < wordLength ) return
+
+      // Check the guess against the target word
+      const checkedGuess = checkGuess( currentGuess, word )
+
+      // Add checked guess to submitted guesses
+      setGuesses( ( prev ) => [ ...prev, checkedGuess ] )
+
+      // Clear current guess
+      setCurrentGuess( "" )
+
+      // Check win condition
+      if ( currentGuess === word ) {
+
+        setGameStatus( "won" )
+        setScreen( "victory" )
+
+      // Check loss condition - guesses.length + 1 because state hasn't updated yet
+      } else if ( guesses.length + 1 >= MAX_GUESSES ) {
+
+        setGameStatus( "lost" )
+        setScreen( "defeat" )
+
+      }
 
     } else if ( currentGuess.length < wordLength && /^[A-Z]$/.test( key ) ) { // Handles letter keys: add to current guess if there's room and it's a valid letter
 
@@ -84,7 +165,7 @@ function App() {
    * Each submitted guess is an array of { letter, status } objects.
    * Empty rows are filled with blank tiles to always keep 6 rows visible.
    * 
-   * @returns {Array} - Array of 6 rows, each an array of tile objects.
+   * @returns { Array } - Array of 6 rows, each an array of tile objects.
    * 
    */
 
