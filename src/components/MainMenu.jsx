@@ -2,9 +2,9 @@
  * 
  * Renders the main menu screen with difficulty selector and play button.
  * 
- * @param {number|null} wordLength - The currently selected word length, or null if unselected.
- * @param {Function} setWordLength - Updates the selected word length.
- * @param {Function} onPlay - Callback fired when the player hits Play.
+ * @param { number|null } wordLength - The currently selected word length, or null if unselected.
+ * @param { Function } setWordLength - Updates the selected word length.
+ * @param { Function } onPlay - Callback fired when the player hits Play.
  * 
  */
 

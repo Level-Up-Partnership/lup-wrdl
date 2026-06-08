@@ -1,9 +1,19 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import MainMenu from './components/MainMenu'
 import GameBoard from './components/GameBoard'
 import Victory from './components/Victory'
 import Defeat from './components/Defeat'
 import './App.css'
+
+// Temporary word bank for demo purposes - replace with API fetch
+const DEMO_WORDS = {
+
+  3: [ "RIP", "CAT", "GUN" ],
+  4: [ "MORE", "JUMP", "PLAY" ],
+  5: [ "PACKS", "RIVER", "SWIFT" ],
+  6: [ "PLEASE", "BOLTED", "SPRINT" ],
+
+}
 
 /**
  * 
@@ -24,8 +34,49 @@ function App() {
   const [ gameStatus, setGameStatus ] = useState( "playing" )
   const [ wordLength, setWordLength ] = useState( null )
 
-  // Build the full board — submitted guesses plus empty rows to fill up to 6
+  // Build the full board - submitted guesses plus empty rows to fill up to 6
   const MAX_GUESSES = 6
+
+  /**
+   * 
+   * Handles a key press from either the on-screen or physical keyboard.
+   * 
+   * @param { string } key - The key that was pressed.
+   * 
+   */
+
+  const handleKey = useCallback( ( key ) => {
+
+    // Ignore input if game is over
+    if ( gameStatus !== "playing" ) return
+
+    // Handles Backspace: remove last character from current guess
+    if ( key === "BACKSPACE" ) {
+
+      setCurrentGuess( ( prev ) => prev.slice( 0, -1 ) )
+
+    } else if ( key === "ENTER" ) { // Handles Enter: submit guess if it has the correct length
+
+      // TODO: validate and submit guess (WRDL-19)
+      console.log( "Submit:", currentGuess )
+
+    } else if ( currentGuess.length < wordLength && /^[A-Z]$/.test( key ) ) { // Handles letter keys: add to current guess if there's room and it's a valid letter
+
+      setCurrentGuess( ( prev ) => prev + key )
+
+    }
+
+  }, [ gameStatus, currentGuess, wordLength ] ) // Re-create only when these change
+
+  // Add event listener for physical keyboard input
+  useEffect( () => {
+
+    const handlePhysicalKey = ( e ) => handleKey( e.key.toUpperCase() )
+    document.addEventListener( "keydown", handlePhysicalKey )
+
+    return () => document.removeEventListener( "keydown", handlePhysicalKey )
+
+  }, [ handleKey ] )
 
   /**
    * 
@@ -47,7 +98,7 @@ function App() {
     // Build the current in-progress row from currentGuess string
     const currentRow = Array.from( { length: wordLength } ).map( ( _, i ) => ( {
 
-      letter: currentGuess[ i ] || "",
+      letter: currentGuess[i] || "",
       status: "",
 
     } ) )
@@ -69,39 +120,6 @@ function App() {
 
   /**
    * 
-   * Handles a key press from either the on-screen or physical keyboard.
-   * 
-   * @param {string} key - The key that was pressed.
-   * 
-   */
-
-  const handleKey = ( key ) => {
-
-    // Ignore input if game is over
-    if ( gameStatus !== "playing" ) return
-
-    // Handle backspace: remove last character from current guess
-    if ( key === "BACKSPACE" || key === "Backspace" ) {
-
-      // Remove last character from current guess
-      setCurrentGuess( ( prev ) => prev.slice( 0, -1 ) )
-
-    } else if ( key === "ENTER" ) { // Handle enter: submit guess if it meets word length requirement
-
-      // TODO: validate and submit guess — coming in WRDL-18/19
-      console.log( "Submit:", currentGuess )
-
-    } else if ( currentGuess.length < wordLength && /^[A-Z]$/.test( key ) ) { // Handle letter keys: add to current guess if under word length limit and is a valid letter
-
-      // Add letter to current guess if under word length limit
-      setCurrentGuess( ( prev ) => prev + key )
-
-    }
-
-  }
-
-  /**
-   * 
    * Starts a new game — resets state and fetches a new word.
    * Word fetching will be wired up in WRDL-18.
    * 
@@ -109,10 +127,13 @@ function App() {
 
   const startGame = () => {
 
+    const wordPool = DEMO_WORDS[ wordLength ]
+    const randomWord = wordPool[ Math.floor( Math.random() * wordPool.length ) ]
+
     setGuesses( [] )
     setCurrentGuess( "" )
     setGameStatus( "playing" )
-    setWord( "" ) // TODO: fetch real word from API in WRDL-18
+    setWord( randomWord ) // TODO: fetch real word from API in WRDL-18
     setScreen( "game" )
 
   }
