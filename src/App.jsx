@@ -24,6 +24,16 @@ function App() {
   const [ gameStatus, setGameStatus ] = useState( "playing" )
   const [ wordLength, setWordLength ] = useState( null )
 
+  // Temporary word bank for demo purposes — replace with API fetch in WRDL-18
+  const DEMO_WORDS = {
+
+    3: [ "RIP", "CAT", "GUN" ],
+    4: [ "MORE", "JUMP", "PLAY" ],
+    5: [ "PACKS", "RIVER", "SWIFT" ],
+    6: [ "PLEASE", "BOLTED", "SPRINT" ],
+
+  }
+
   // Build the full board — submitted guesses plus empty rows to fill up to 6
   const MAX_GUESSES = 6
 
@@ -47,7 +57,7 @@ function App() {
     // Build the current in-progress row from currentGuess string
     const currentRow = Array.from( { length: wordLength } ).map( ( _, i ) => ( {
 
-      letter: currentGuess[ i ] || "",
+      letter: currentGuess[i] || "",
       status: "",
 
     } ) )
@@ -109,10 +119,13 @@ function App() {
 
   const startGame = () => {
 
+    const wordPool = DEMO_WORDS[ wordLength ]
+    const randomWord = wordPool[ Math.floor( Math.random() * wordPool.length ) ]
+
     setGuesses( [] )
     setCurrentGuess( "" )
     setGameStatus( "playing" )
-    setWord( "" ) // TODO: fetch real word from API in WRDL-18
+    setWord( randomWord ) // TODO: fetch real word from API in WRDL-18
     setScreen( "game" )
 
   }
