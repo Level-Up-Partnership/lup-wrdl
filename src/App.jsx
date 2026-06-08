@@ -113,10 +113,33 @@ function App() {
 
       setCurrentGuess( ( prev ) => prev.slice( 0, -1 ) )
 
-    } else if ( key === "ENTER" ) { // Handles Enter: submit guess if it has the correct length
+    } else if ( key === "ENTER" ) { // Handles Enter: submit the guess if it's long enough
 
-      // TODO: validate and submit guess (WRDL-19)
-      console.log( "Submit:", currentGuess )
+      // Reject if guess is too short
+      if ( currentGuess.length < wordLength ) return
+
+      // Check the guess against the target word
+      const checkedGuess = checkGuess( currentGuess, word )
+
+      // Add checked guess to submitted guesses
+      setGuesses( ( prev ) => [ ...prev, checkedGuess ] )
+
+      // Clear current guess
+      setCurrentGuess( "" )
+
+      // Check win condition
+      if ( currentGuess === word ) {
+
+        setGameStatus( "won" )
+        setScreen( "victory" )
+
+      // Check loss condition - guesses.length + 1 because state hasn't updated yet
+      } else if ( guesses.length + 1 >= MAX_GUESSES ) {
+
+        setGameStatus( "lost" )
+        setScreen( "defeat" )
+
+      }
 
     } else if ( currentGuess.length < wordLength && /^[A-Z]$/.test( key ) ) { // Handles letter keys: add to current guess if there's room and it's a valid letter
 
