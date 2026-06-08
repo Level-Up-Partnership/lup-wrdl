@@ -2,8 +2,8 @@
  * 
  * Renders the victory screen shown when the player guesses the word correctly.
  * 
- * @param {Function} onPlayAgain - Callback fired when the player wants to play again.
- * @param {Function} onMainMenu - Callback fired when the player returns to main menu.
+ * @param { Function } onPlayAgain - Callback fired when the player wants to play again.
+ * @param { Function } onMainMenu - Callback fired when the player returns to main menu.
  * 
  */
 

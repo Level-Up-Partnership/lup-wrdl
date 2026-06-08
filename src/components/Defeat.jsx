@@ -2,9 +2,9 @@
  * 
  * Renders the defeat screen shown when the player runs out of guesses.
  * 
- * @param {string} word - The correct word the player failed to guess.
- * @param {Function} onPlayAgain - Callback fired when the player wants to play again.
- * @param {Function} onMainMenu - Callback fired when the player returns to main menu.
+ * @param { string } word - The correct word the player failed to guess.
+ * @param { Function } onPlayAgain - Callback fired when the player wants to play again.
+ * @param { Function } onMainMenu - Callback fired when the player returns to main menu.
  * 
  */
 
