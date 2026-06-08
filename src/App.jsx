@@ -1,91 +1,187 @@
 import { useState } from 'react'
+import MainMenu from './components/MainMenu'
+import GameBoard from './components/GameBoard'
+import Victory from './components/Victory'
+import Defeat from './components/Defeat'
 import './App.css'
 
-// Keyboard rows matching a standard QWERTY layout
-const KEYBOARD_ROWS = [
-
-  ['Q','W','E','R','T','Y','U','I','O','P', 'BACKSPACE'],
-  ['A','S','D','F','G','H','J','K','L', 'ENTER'],
-  ['Z','X','C','V','B','N','M'],
-
-]
+/**
+ * 
+ * This is the main App component that manages overall game state and screen transitions.
+ * It renders the appropriate screen (main menu, game board, victory, defeat) based on the current state.
+ * 
+ * @returns - The rendered App component.
+ * 
+ */
 
 function App() {
 
-  const [ wordLength, setWordLength ] = useState(5) // default to 5-letter game
+  // Game state
+  const [ screen, setScreen ] = useState( "menu" )
+  const [ word, setWord ] = useState( "" )
+  const [ guesses, setGuesses ] = useState( [] )
+  const [ currentGuess, setCurrentGuess ] = useState( "" )
+  const [ gameStatus, setGameStatus ] = useState( "playing" )
+  const [ wordLength, setWordLength ] = useState( null )
+
+  // Build the full board — submitted guesses plus empty rows to fill up to 6
   const MAX_GUESSES = 6
 
+  /**
+   * 
+   * Builds the board array from submitted guesses and empty filler rows.
+   * Each submitted guess is an array of { letter, status } objects.
+   * Empty rows are filled with blank tiles to always keep 6 rows visible.
+   * 
+   * @returns {Array} - Array of 6 rows, each an array of tile objects.
+   * 
+   */
+
+  const buildBoard = () => {
+
+    // Convert submitted guesses into tile objects with statuses
+    const submittedRows = guesses.map( ( guess ) =>
+      guess.map( ( tile ) => ( { letter: tile.letter, status: tile.status } ) )
+    )
+
+    // Build the current in-progress row from currentGuess string
+    const currentRow = Array.from( { length: wordLength } ).map( ( _, i ) => ( {
+
+      letter: currentGuess[ i ] || "",
+      status: "",
+
+    } ) )
+
+    // Fill remaining rows with empty tiles
+    const emptyRow = Array.from( { length: wordLength }).map( () => ( {
+
+      letter: "",
+      status: "",
+
+    } ) )
+
+    const emptyRowsCount = MAX_GUESSES - submittedRows.length - 1
+    const emptyRows = Array.from( { length: Math.max( 0, emptyRowsCount ) } ).map( () => emptyRow )
+
+    return [ ...submittedRows, currentRow, ...emptyRows ]
+
+  }
+
+  /**
+   * 
+   * Handles a key press from either the on-screen or physical keyboard.
+   * 
+   * @param {string} key - The key that was pressed.
+   * 
+   */
+
+  const handleKey = ( key ) => {
+
+    // Ignore input if game is over
+    if ( gameStatus !== "playing" ) return
+
+    // Handle backspace: remove last character from current guess
+    if ( key === "BACKSPACE" || key === "Backspace" ) {
+
+      // Remove last character from current guess
+      setCurrentGuess( ( prev ) => prev.slice( 0, -1 ) )
+
+    } else if ( key === "ENTER" ) { // Handle enter: submit guess if it meets word length requirement
+
+      // TODO: validate and submit guess — coming in WRDL-18/19
+      console.log( "Submit:", currentGuess )
+
+    } else if ( currentGuess.length < wordLength && /^[A-Z]$/.test( key ) ) { // Handle letter keys: add to current guess if under word length limit and is a valid letter
+
+      // Add letter to current guess if under word length limit
+      setCurrentGuess( ( prev ) => prev + key )
+
+    }
+
+  }
+
+  /**
+   * 
+   * Starts a new game — resets state and fetches a new word.
+   * Word fetching will be wired up in WRDL-18.
+   * 
+   */
+
+  const startGame = () => {
+
+    setGuesses( [] )
+    setCurrentGuess( "" )
+    setGameStatus( "playing" )
+    setWord( "" ) // TODO: fetch real word from API in WRDL-18
+    setScreen( "game" )
+
+  }
+
+  /**
+   * 
+   * Returns the player to the main menu and resets game state.
+   * 
+   */
+
+  const goToMenu = () => {
+
+    setScreen( "menu" )
+    setGuesses( [] )
+    setCurrentGuess( "" )
+    setGameStatus( "playing" )
+    setWord( "" )
+
+  }
+
+  // Render the correct screen based on current screen state
   return (
 
     <div className="app">
 
-      {/* Header */}
       <header className="header">
-
         <h1>WRDL</h1>
-
       </header>
 
-      {/* Difficulty selector */}
-      <div className="difficulty">
+      { screen === "menu" && (
 
-        { [ 3, 4, 5, 6 ].map( ( len ) => (
-          
-          <button
-            key={len}
-            className={ `diff-btn ${ wordLength === len ? 'active' : '' }` }
-            onClick={ () => setWordLength( len ) }
-          >
-            { len }
-          </button>
+        <MainMenu
+          wordLength={ wordLength }
+          setWordLength={ setWordLength }
+          onPlay={ startGame }
+        />
 
-        ) ) }
+      ) }
 
-      </div> { /* Ends difficulty selector */ }
+      { screen === "game" && (
 
-      {/* Game board */}
-      <div className="board">
+        <GameBoard
+          guesses={ buildBoard() }
+          onKey={ handleKey }
+          wordLength={ wordLength }
+        />
 
-        {/* Render empty tiles based on selected word length and max guesses */}
-        { Array.from( { length: MAX_GUESSES } ).map( ( _, rowIndex ) => (
+      ) }
 
-          <div key={ rowIndex } className="row">
+      { screen === "victory" && (
 
-            {/* Render empty tiles for the current row */}
-            { Array.from( { length: wordLength } ).map( ( _, colIndex ) => (
+        <Victory
+          onPlayAgain={ startGame }
+          onMainMenu={ goToMenu }
+        />
 
-              <div key={ colIndex } className="tile"></div>
+      ) }
 
-            ) ) }
+      { screen === "defeat" && (
 
-          </div>
+        <Defeat
+          word={ word }
+          onPlayAgain={ startGame }
+          onMainMenu={ goToMenu }
+        />
 
-        ) ) }
+      ) }
 
-      </div> { /* Ends game board */ }
-
-      {/* On-screen keyboard */}
-      <div className="keyboard">
-
-        {/* Render keyboard rows and keys */}
-        { KEYBOARD_ROWS.map( ( row, rowIndex ) => (
-
-          <div key={ rowIndex } className="keyboard-row">
-
-            {/* Render keys for the current row */}
-            { row.map( ( key ) => (
-
-              <button key={ key } className="key">{ key }</button>
-
-            ) ) }
-
-          </div>
-
-        ) ) }
-
-      </div> { /* Ends app container */ }
-
-    </div> /* Ends app container */
+    </div>
 
   )
 
