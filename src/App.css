@@ -192,3 +192,29 @@ body {
   min-width: 36px;
 
 }
+
+
+/* Tile statuses */
+.tile.correct {
+
+  background: #538d4e;
+  border-color: #538d4e;
+  color: #fff;
+
+}
+
+.tile.present {
+
+  background: #b59f3b;
+  border-color: #b59f3b;
+  color: #fff;
+
+}
+
+.tile.absent {
+
+  background: #3a3a3c;
+  border-color: #3a3a3c;
+  color: #fff;
+
+}
