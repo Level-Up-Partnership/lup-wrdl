@@ -12,7 +12,7 @@ const DEMO_WORDS = {
   4: [ "MORE", "JUMP", "PLAY" ],
   5: [ "PACKS", "RIVER", "SWIFT" ],
   6: [ "PLEASE", "BOLTED", "SPRINT" ],
-
+  
 }
 
 
@@ -131,13 +131,13 @@ function App() {
       if ( currentGuess === word ) {
 
         setGameStatus( "won" )
-        setScreen( "victory" )
+        setTimeout( () => setScreen( "victory" ), 2000 ) // brief delay so player sees the result
 
-      // Check loss condition - guesses.length + 1 because state hasn't updated yet
+      // Check loss condition
       } else if ( guesses.length + 1 >= MAX_GUESSES ) {
 
         setGameStatus( "lost" )
-        setScreen( "defeat" )
+        setTimeout( () => setScreen( "defeat" ), 2000 )
 
       }
 
@@ -191,6 +191,13 @@ function App() {
       status: "",
 
     } ) )
+
+    // Stop showing current row once all guesses are used
+    if ( submittedRows.length >= MAX_GUESSES ) {
+
+      return submittedRows
+
+    }
 
     const emptyRowsCount = MAX_GUESSES - submittedRows.length - 1
     const emptyRows = Array.from( { length: Math.max( 0, emptyRowsCount ) } ).map( () => emptyRow )
@@ -267,17 +274,17 @@ function App() {
       { screen === "victory" && (
 
         <Victory
-          onPlayAgain={ startGame }
+          onPlayAgain={ goToMenu } // Takes the player back to the menu to select a new word length and start a new game
           onMainMenu={ goToMenu }
         />
 
-      ) }
+      )}
 
       { screen === "defeat" && (
 
         <Defeat
           word={ word }
-          onPlayAgain={ startGame }
+          onPlayAgain={ goToMenu } // Takes the player back to the menu to select a new word length and start a new game
           onMainMenu={ goToMenu }
         />
 
