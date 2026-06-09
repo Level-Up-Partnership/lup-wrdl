@@ -12,7 +12,7 @@ const DEMO_WORDS = {
   4: [ "MORE", "JUMP", "PLAY" ],
   5: [ "PACKS", "RIVER", "SWIFT" ],
   6: [ "PLEASE", "BOLTED", "SPRINT" ],
-
+  
 }
 
 
@@ -194,7 +194,7 @@ function App() {
 
     // Stop showing current row once all guesses are used
     if ( submittedRows.length >= MAX_GUESSES ) {
-      
+
       return submittedRows
 
     }
