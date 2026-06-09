@@ -192,6 +192,13 @@ function App() {
 
     } ) )
 
+    // Stop showing current row once all guesses are used
+    if ( submittedRows.length >= MAX_GUESSES ) {
+      
+      return submittedRows
+
+    }
+
     const emptyRowsCount = MAX_GUESSES - submittedRows.length - 1
     const emptyRows = Array.from( { length: Math.max( 0, emptyRowsCount ) } ).map( () => emptyRow )
 
@@ -267,17 +274,17 @@ function App() {
       { screen === "victory" && (
 
         <Victory
-          onPlayAgain={ startGame }
+          onPlayAgain={ goToMenu } // Takes the player back to the menu to select a new word length and start a new game
           onMainMenu={ goToMenu }
         />
 
-      ) }
+      )}
 
       { screen === "defeat" && (
 
         <Defeat
           word={ word }
-          onPlayAgain={ startGame }
+          onPlayAgain={ goToMenu } // Takes the player back to the menu to select a new word length and start a new game
           onMainMenu={ goToMenu }
         />
 
