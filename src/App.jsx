@@ -97,13 +97,39 @@ function App() {
 
   /**
    * 
+   * Checks whether a word exists using the Free Dictionary API.
+   * 
+   * @param {string} word - The word to validate.
+   * @returns {Promise<boolean>} - True if the word exists, false otherwise.
+   * 
+   */
+
+  const isValidWord = async ( word ) => {
+
+    // Checks if the word exists in the Dictionary API
+    try {
+
+      const response = await fetch( `https://api.dictionaryapi.dev/api/v2/entries/en/${ word.toLowerCase() }` )
+      return response.ok // true if status is 200-299, false for 404
+
+    } catch ( error ) { // Error handling for network issues or other fetch problems
+
+      console.error( "Dictionary API error:", error )
+      return false // treat API failure as invalid - handled fully in WRDL-33
+
+    }
+
+  }
+
+  /**
+   * 
    * Handles a key press from either the on-screen or physical keyboard.
    * 
    * @param { string } key - The key that was pressed.
    * 
    */
 
-  const handleKey = useCallback( ( key ) => {
+  const handleKey = useCallback( async ( key ) => {
 
     // Ignore input if game is over
     if ( gameStatus !== "playing" ) return
@@ -117,6 +143,18 @@ function App() {
 
       // Reject if guess is too short
       if ( currentGuess.length < wordLength ) return
+
+      // Validate the guess against the dictionary API
+      const valid = await isValidWord( currentGuess )
+
+      // Reject if the word is not valid
+      if ( !valid ) {
+
+        // TODO: trigger shake animation (WRDL-34)
+        console.log( "Invalid word:", currentGuess )
+        return
+
+      }
 
       // Check the guess against the target word
       const checkedGuess = checkGuess( currentGuess, word )
