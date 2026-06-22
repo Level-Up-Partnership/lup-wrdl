@@ -189,13 +189,13 @@ function App() {
       if ( currentGuess === word ) {
 
         setGameStatus( "won" )
-        setTimeout( () => setScreen( "victory" ), 2000 ) // brief delay so player sees the result
+        setTimeout( () => setScreen( "victory" ), 1000 ) // brief delay so player sees the result
 
       // Check loss condition
       } else if ( guesses.length + 1 >= MAX_GUESSES ) {
 
         setGameStatus( "lost" )
-        setTimeout( () => setScreen( "defeat" ), 2000 )
+        setTimeout( () => setScreen( "defeat" ), 1000 ) // brief delay so player sees the result
 
       }
 
