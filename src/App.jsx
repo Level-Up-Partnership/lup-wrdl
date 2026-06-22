@@ -34,6 +34,7 @@ function App() {
   const [ currentGuess, setCurrentGuess ] = useState( "" )
   const [ gameStatus, setGameStatus ] = useState( "playing" )
   const [ wordLength, setWordLength ] = useState( null )
+  const [ errorMessage, setErrorMessage ] = useState( "" )
 
   // Build the full board - submitted guesses plus empty rows to fill up to 6
   const MAX_GUESSES = 6
@@ -99,8 +100,8 @@ function App() {
    * 
    * Checks whether a word exists using the Free Dictionary API.
    * 
-   * @param {string} word - The word to validate.
-   * @returns {Promise<boolean>} - True if the word exists, false otherwise.
+   * @param { string } word - The word to validate.
+   * @returns { Promise<boolean> } - True if the word exists, false otherwise.
    * 
    */
 
@@ -110,12 +111,19 @@ function App() {
     try {
 
       const response = await fetch( `https://api.dictionaryapi.dev/api/v2/entries/en/${ word.toLowerCase() }` )
-      return response.ok // true if status is 200-299, false for 404
 
-    } catch ( error ) { // Error handling for network issues or other fetch problems
+      // If the response is OK (status 200), the word exists in the dictionary
+      if ( response.ok )
+        
+        return { valid: true }
+
+      // 404 — word not found in dictionary
+      return { valid: false, reason: "notFound" }
+
+    } catch ( error ) { // Network error or API down
 
       console.error( "Dictionary API error:", error )
-      return false // treat API failure as invalid - handled fully in WRDL-33
+      return { valid: false, reason: "networkError" }
 
     }
 
@@ -145,16 +153,28 @@ function App() {
       if ( currentGuess.length < wordLength ) return
 
       // Validate the guess against the dictionary API
-      const valid = await isValidWord( currentGuess )
+      const result = await isValidWord( currentGuess )
 
       // Reject if the word is not valid
-      if ( !valid ) {
+      if ( !result.valid ) {
 
-        // TODO: trigger shake animation (WRDL-34)
-        console.log( "Invalid word:", currentGuess )
+        // Set error message based on the reason for invalidity
+        if ( result.reason === "networkError" ) {
+
+          setErrorMessage( "Connection error — please try again" )
+
+        } else {
+
+          setErrorMessage( "Not a valid word" )
+
+        }
+
         return
 
       }
+
+      // Clear error message on valid guess
+      setErrorMessage( "" )
 
       // Check the guess against the target word
       const checkedGuess = checkGuess( currentGuess, word )
@@ -246,7 +266,7 @@ function App() {
 
   /**
    * 
-   * Starts a new game — resets state and fetches a new word.
+   * Starts a new game - resets state and fetches a new word.
    * Word fetching will be wired up in WRDL-18.
    * 
    */
@@ -305,6 +325,7 @@ function App() {
           guesses={ buildBoard() }
           onKey={ handleKey }
           wordLength={ wordLength }
+          errorMessage={ errorMessage } // Displays an error message if the last guess was invalid
         />
 
       ) }

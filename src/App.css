@@ -268,3 +268,13 @@ body {
   width: 200px;
 
 }
+
+.error-message {
+
+  color: #ff4444;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: center;
+
+}
