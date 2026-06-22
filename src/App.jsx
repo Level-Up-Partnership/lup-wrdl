@@ -34,6 +34,7 @@ function App() {
   const [ currentGuess, setCurrentGuess ] = useState( "" )
   const [ gameStatus, setGameStatus ] = useState( "playing" )
   const [ wordLength, setWordLength ] = useState( null )
+  const [ errorMessage, setErrorMessage ] = useState( "" )
 
   // Build the full board - submitted guesses plus empty rows to fill up to 6
   const MAX_GUESSES = 6
@@ -97,13 +98,46 @@ function App() {
 
   /**
    * 
+   * Checks whether a word exists using the Free Dictionary API.
+   * 
+   * @param { string } word - The word to validate.
+   * @returns { Promise<boolean> } - True if the word exists, false otherwise.
+   * 
+   */
+
+  const isValidWord = async ( word ) => {
+
+    // Checks if the word exists in the Dictionary API
+    try {
+
+      const response = await fetch( `https://api.dictionaryapi.dev/api/v2/entries/en/${ word.toLowerCase() }` )
+
+      // If the response is OK (status 200), the word exists in the dictionary
+      if ( response.ok )
+        
+        return { valid: true }
+
+      // 404 — word not found in dictionary
+      return { valid: false, reason: "notFound" }
+
+    } catch ( error ) { // Network error or API down
+
+      console.error( "Dictionary API error:", error )
+      return { valid: false, reason: "networkError" }
+
+    }
+
+  }
+
+  /**
+   * 
    * Handles a key press from either the on-screen or physical keyboard.
    * 
    * @param { string } key - The key that was pressed.
    * 
    */
 
-  const handleKey = useCallback( ( key ) => {
+  const handleKey = useCallback( async ( key ) => {
 
     // Ignore input if game is over
     if ( gameStatus !== "playing" ) return
@@ -118,6 +152,30 @@ function App() {
       // Reject if guess is too short
       if ( currentGuess.length < wordLength ) return
 
+      // Validate the guess against the dictionary API
+      const result = await isValidWord( currentGuess )
+
+      // Reject if the word is not valid
+      if ( !result.valid ) {
+
+        // Set error message based on the reason for invalidity
+        if ( result.reason === "networkError" ) {
+
+          setErrorMessage( "Connection error — please try again" )
+
+        } else {
+
+          setErrorMessage( "Not a valid word" )
+
+        }
+
+        return
+
+      }
+
+      // Clear error message on valid guess
+      setErrorMessage( "" )
+
       // Check the guess against the target word
       const checkedGuess = checkGuess( currentGuess, word )
 
@@ -131,13 +189,13 @@ function App() {
       if ( currentGuess === word ) {
 
         setGameStatus( "won" )
-        setTimeout( () => setScreen( "victory" ), 2000 ) // brief delay so player sees the result
+        setTimeout( () => setScreen( "victory" ), 1000 ) // brief delay so player sees the result
 
       // Check loss condition
       } else if ( guesses.length + 1 >= MAX_GUESSES ) {
 
         setGameStatus( "lost" )
-        setTimeout( () => setScreen( "defeat" ), 2000 )
+        setTimeout( () => setScreen( "defeat" ), 1000 ) // brief delay so player sees the result
 
       }
 
@@ -208,7 +266,7 @@ function App() {
 
   /**
    * 
-   * Starts a new game — resets state and fetches a new word.
+   * Starts a new game - resets state and fetches a new word.
    * Word fetching will be wired up in WRDL-18.
    * 
    */
@@ -267,6 +325,7 @@ function App() {
           guesses={ buildBoard() }
           onKey={ handleKey }
           wordLength={ wordLength }
+          errorMessage={ errorMessage } // Displays an error message if the last guess was invalid
         />
 
       ) }
