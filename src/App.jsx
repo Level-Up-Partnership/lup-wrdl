@@ -5,7 +5,7 @@ import Victory from './components/Victory'
 import Defeat from './components/Defeat'
 import './App.css'
 
-// Temporary word bank for demo purposes - replace with API fetch
+/* Temporary word bank for demo purposes - replace with API fetch
 const DEMO_WORDS = {
 
   3: [ "RIP", "CAT", "GUN" ],
@@ -13,7 +13,7 @@ const DEMO_WORDS = {
   5: [ "PACKS", "RIVER", "SWIFT" ],
   6: [ "PLEASE", "BOLTED", "SPRINT" ],
   
-}
+} */
 
 
 /**
@@ -266,21 +266,34 @@ function App() {
 
   /**
    * 
-   * Starts a new game - resets state and fetches a new word.
-   * Word fetching will be wired up in WRDL-18.
+   * Starts a new game - resets state and fetches a new random word from the API.
+   * 
+   * @param { number } wordLength - The length of the word to fetch.
    * 
    */
 
-  const startGame = () => {
+  const startGame = async () => {
 
-    const wordPool = DEMO_WORDS[ wordLength ]
-    const randomWord = wordPool[ Math.floor( Math.random() * wordPool.length ) ]
+    // Tries to fetch a random word from the API based on the selected word length
+    try {
 
-    setGuesses( [] )
-    setCurrentGuess( "" )
-    setGameStatus( "playing" )
-    setWord( randomWord ) // TODO: fetch real word from API in WRDL-18
-    setScreen( "game" )
+      // Fetch a random word from the API based on selected word length
+      const response = await fetch( `https://random-word-api.herokuapp.com/word?length=${ wordLength }` )
+      const data = await response.json()
+      const randomWord = data[0].toUpperCase()
+
+      setGuesses( [] )
+      setCurrentGuess( "" )
+      setGameStatus( "playing" )
+      setErrorMessage( "" )
+      setWord( randomWord )
+      setScreen( "game" )
+
+    } catch ( error ) { // Handle fetch error gracefully
+
+      console.error( "Failed to fetch word:", error )
+
+    }
 
   }
 
