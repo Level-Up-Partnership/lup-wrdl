@@ -9,6 +9,7 @@ import Keyboard from './Keyboard'
  * @param { Function } onKey - Callback fired when a key is pressed.
  * @param { number } wordLength - The current word length, used for the subtitle.
  * @param { string } errorMessage - Error message to display.
+ * 
  */
 
 function GameBoard( { guesses, onKey, wordLength, errorMessage } ) {
@@ -21,7 +22,7 @@ function GameBoard( { guesses, onKey, wordLength, errorMessage } ) {
       <p className="subtitle">{ wordLength }-LETTER WRDL</p>
       <p className="error-message">{ errorMessage }</p>
       <Board guesses={ guesses } />
-      <Keyboard onKey={ onKey } />
+      <Keyboard onKey={ onKey } guesses={ guesses } />
 
     </div>
 

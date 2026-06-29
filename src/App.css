@@ -193,6 +193,13 @@ body {
 
 }
 
+.key.absent {
+
+  background: #1a1a1b;
+  color: #3a3a3c;
+
+}
+
 
 /* Tile statuses */
 .tile.correct {

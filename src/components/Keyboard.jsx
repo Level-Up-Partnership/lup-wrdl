@@ -8,14 +8,25 @@ const KEYBOARD_ROWS = [
 ]
 
 /**
- * 
+ *
  * Renders the on-screen QWERTY keyboard.
- * 
+ *
  * @param { Function } onKey - Callback fired when a key is clicked, receives the key string.
- * 
+ * @param { Array } guesses - Array of submitted guesses, used to gray out absent letters.
+ *
  */
 
-function Keyboard( { onKey } ) {
+function Keyboard( { onKey, guesses } ) {
+
+  // Build a set of letters marked absent across all submitted guesses
+  const absentLetters = new Set(
+
+    guesses
+      .flat()
+      .filter( ( tile ) => tile.status === 'absent' )
+      .map( ( tile ) => tile.letter )
+
+  )
 
   return (
 
@@ -29,7 +40,7 @@ function Keyboard( { onKey } ) {
 
             <button
               key={ key }
-              className="key"
+              className={ `key${ absentLetters.has( key ) ? ' absent' : '' }` }
               onClick={ () => onKey( key ) }
             >
               { key }
