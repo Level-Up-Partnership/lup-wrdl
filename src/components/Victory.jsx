@@ -1,13 +1,16 @@
+import Board from './Board'
+
 /**
- * 
+ *
  * Renders the victory screen shown when the player guesses the word correctly.
- * 
+ *
+ * @param { Array } board - The completed board state to display.
  * @param { Function } onPlayAgain - Callback fired when the player wants to play again.
  * @param { Function } onMainMenu - Callback fired when the player returns to main menu.
- * 
+ *
  */
 
-function Victory( { onPlayAgain, onMainMenu } ) {
+function Victory( { board, onPlayAgain, onMainMenu } ) {
 
   return (
 
@@ -22,6 +25,8 @@ function Victory( { onPlayAgain, onMainMenu } ) {
       <button className="menu-btn" onClick={ onMainMenu }>
         Main Menu
       </button>
+
+      <Board guesses={ board } />
 
     </div>
 
