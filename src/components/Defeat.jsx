@@ -1,14 +1,17 @@
+import Board from './Board'
+
 /**
- * 
+ *
  * Renders the defeat screen shown when the player runs out of guesses.
- * 
+ *
  * @param { string } word - The correct word the player failed to guess.
+ * @param { Array } board - The completed board state to display.
  * @param { Function } onPlayAgain - Callback fired when the player wants to play again.
  * @param { Function } onMainMenu - Callback fired when the player returns to main menu.
- * 
+ *
  */
 
-function Defeat( { word, onPlayAgain, onMainMenu } ) {
+function Defeat( { word, board, onPlayAgain, onMainMenu } ) {
 
   return (
 
@@ -25,6 +28,8 @@ function Defeat( { word, onPlayAgain, onMainMenu } ) {
       <button className="menu-btn" onClick={ onMainMenu }>
         Main Menu
       </button>
+
+      <Board guesses={ board } />
 
     </div>
 

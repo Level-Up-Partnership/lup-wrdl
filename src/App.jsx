@@ -291,6 +291,7 @@ function App() {
       { screen === "victory" && (
 
         <Victory
+          board={ buildBoard() } // Pass the final board state to the Victory component
           onPlayAgain={ goToMenu } // Takes the player back to the menu to select a new word length and start a new game
           onMainMenu={ goToMenu }
         />
@@ -301,6 +302,7 @@ function App() {
 
         <Defeat
           word={ word }
+          board={ buildBoard() } // Pass the final board state to the Defeat component
           onPlayAgain={ goToMenu } // Takes the player back to the menu to select a new word length and start a new game
           onMainMenu={ goToMenu }
         />
