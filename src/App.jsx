@@ -4,6 +4,7 @@ import GameBoard from './components/GameBoard'
 import Victory from './components/Victory'
 import Defeat from './components/Defeat'
 import './App.css'
+import { checkGuess } from './gameLogic' // Import the checkGuess function from gameLogic.js
 
 /* Temporary word bank for demo purposes - replace with API fetch
 const DEMO_WORDS = {
@@ -42,62 +43,6 @@ function App() {
 
   /**
    * 
-   * Checks a guess against the target word and returns tile statuses.
-   * Uses two passes to correctly handle duplicate letters.
-   * 
-   * @param { string } guess - The player's guessed word (uppercase).
-   * @param { string } target - The target word to guess (uppercase).
-   * @returns { Array } - Array of { letter, status } objects.
-   * 
-   */
-
-  const checkGuess = ( guess, target ) => {
-
-    // Convert target to array so we can "claim" letters as we match them
-    const targetLetters = target.split( "" )
-    const result = Array.from( { length: guess.length } ).map( () => ( { letter: "", status: "absent" } ) )
-
-    // Pass 1 - find correct letters (right letter, right position)
-    guess.split( "" ).forEach( ( letter, i ) => {
-
-      // Mark as correct if letter matches target in the same position
-      if ( letter === targetLetters[i] ) {
-
-        result[i] = { letter, status: "correct" }
-        targetLetters[i] = null // Claim this letter so it can't be matched again
-
-      }
-
-    } )
-
-    // Pass 2 - find present letters (right letter, wrong position)
-    guess.split( "" ).forEach( ( letter, i ) => {
-
-      // Skip letters already marked correct in pass 1
-      if ( result[i].status === "correct" ) return
-
-      const foundIndex = targetLetters.indexOf( letter )
-
-      // Mark as present if letter exists elsewhere in target
-      if ( foundIndex !== -1 ) {
-
-        result[i] = { letter, status: "present" }
-        targetLetters[ foundIndex ] = null // Claim this letter so it can't be matched again
-
-      } else { // Mark as absent if letter is not found in target at all
-
-        result[i] = { letter, status: "absent" }
-
-      }
-
-    } )
-
-    return result
-
-  }
-
-  /**
-   * 
    * Checks whether a word exists using the Free Dictionary API.
    * 
    * @param { string } word - The word to validate.
@@ -117,7 +62,7 @@ function App() {
         
         return { valid: true }
 
-      // 404 — word not found in dictionary
+      // 404 - word not found in dictionary
       return { valid: false, reason: "notFound" }
 
     } catch ( error ) { // Network error or API down
