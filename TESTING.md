@@ -1,91 +1,123 @@
-# WRDL — Testing Document
+# WRDL - Testing Document
 
 ## Overview
+
 This document outlines the test plan for WRDL, a React-based Wordle clone.
-Tests are written in Cypress and cover all 6 in-scope features from the Scope Lock Document.
+Tests are written in **Vitest** and cover the core game logic in `src/gameLogic.js`.
+This is New Skill 2 as defined in the Scope Lock Document.
+
+> **Note:** An earlier version of this document referenced Cypress for end-to-end testing.
+> That approach was superseded before any tests were written. Vitest was chosen instead
+> because the Scope Lock Document requires automated testing of game logic, not UI interaction.
 
 ---
 
 ## Test Suite Structure
 
-- cypress/e2e/
-- 01_game_board.cy.js
-- 02_input_system.cy.js
-- 03_guess_checks.cy.js
-- 04_difficulty_setting.cy.js
-- 05_win_loss.cy.js
-- 06_dictionary_validation.cy.js
+```
+src/
+  gameLogic.js          - Pure logic functions under test
+  gameLogic.test.js     - All Vitest test cases
+```
 
 ---
 
-## Feature 1 - Game Board & Flow State
+## How to Run Tests
+
+```bash
+npm test
+```
+
+Vitest runs in watch mode by default - it re-runs automatically on every file save.
+Press `q` to quit.
+
+---
+
+## Test Cases
+
+### WRDL-39 - `isGuessTooShort`
+
+Tests that a guess shorter than the required word length is rejected before submission.
 
 | # | Test Case | Expected Result |
-| --- | --- | --- |
-| 1.1 | App loads in the browser | Game board renders on page load |
-| 1.2 | A letter is enter | Board updates to display the letter |
-| 1.3 | A guess is submitted | Board reflects the submitted guess in the correct row |
+|---|---|---|
+| 39.1 | Guess is shorter than wordLength | Returns `true` |
+| 39.2 | Guess matches wordLength | Returns `false` |
 
 ---
 
-## Feature 2 - Combined Input System
+### WRDL-40 - `checkGuess` correct status
 
-| # | Test Case | Expect Result |
-| --- | --- | --- |
-| 2.1 | Player presses a letter on physical keyboard | Letter appears on the board |
-| 2.2 | Player clicks a letter on the on-screen keyboard | Letter appears on the board |
-| 2.3 | Player presses Backspace on physical keyboard | Last letter is removed | Last letter is removed |
-| 2.4 | Player clicks Backspace on the on-screen keyboard | Last letter is removed |
-| 2.5 | Player presses Enter on physical keyboard | Guess is submitted |
-| 2.6 | Player clicks Enter on on-screen keyboard | Guess is submitted |
+Tests that a letter in the correct position is marked as `correct`.
+
+| # | Test Case | Expected Result |
+|---|---|---|
+| 40.1 | Letter matches target at same index | `status` is `'correct'` |
 
 ---
 
-## Feature 3 - Wordle-Style Guess Checks
+### WRDL-41 - `checkGuess` present status
 
-| # | Test Case | Expect Result |
-| --- | --- | --- |
-| 3.1 | Letter is in correct position | Tile shows green |
-| 3.2 | Letter is in word but wrong position | Tile shows yellow |
-| 3.3 | Letter is not in the word | Tile shows grey |
-| 3.4 | Guess contains duplicate letters | Tiles reflect accurate feedback per letter |
+Tests that a letter that exists in the word but is in the wrong position is marked as `present`.
 
----
-
-## Feature 4 - Difficulty Setting
-
-| # | Test Case | Expect Result |
-| --- | --- | --- |
-| 4.1 | Player selects 3-letter mode | Board adjusts to 3-letter layout |
-| 4.2 | Player selects 4-letter mode | Board adjusts to 4-letter layout |
-| 4.3 | Player selects 5-letter mode | Board adjusts to 5-letter layout |
-| 4.4 | Player selects 6-letter mode | Board adjusts to 6-letter layout |
+| # | Test Case | Expected Result |
+|---|---|---|
+| 41.1 | Letter exists in target but at different index | `status` is `'present'` |
 
 ---
 
-## Feature 5 - Win/Loss Conditions
+### WRDL-42 - `checkGuess` absent status
 
-| # | Test Case | Expect Result |
-| --- | --- | --- |
-| 5.1 | Player guesses the correct word | Win state is displayed |
-| 5.2 | Player uses all attempts without guessing correctly | Loss state is displayed |
-| 5.3 | Player wins mid-game | Game stops accepting input after win |
-| 5.4 | Player loses | Game stops accepting input after loss |
+Tests that a letter that does not appear in the target word at all is marked as `absent`.
+
+| # | Test Case | Expected Result |
+|---|---|---|
+| 42.1 | Letter does not exist anywhere in target | `status` is `'absent'` |
 
 ---
 
-## Feature 6 - Dictionary Validation
+### WRDL-43 - `checkGuess` duplicate letters
 
-| # | Test Case | Expect Result |
-| --- | --- | --- |
-| 6.1 | Player submits a valid word | Guess is accepted |
-| 6.2 | Player submits an invalid word | Guess is rejected with a message |
-| 6.3 | Dictionary API fails | App does not crash |
+Tests that duplicate letters are handled correctly using the two-pass algorithm.
+A duplicate letter should not be double-counted - each instance in the target can only be claimed once.
+
+| # | Test Case | Expected Result |
+|---|---|---|
+| 43.1 | Guess has duplicate letter, target has one instance | Only one tile is marked `correct` or `present`; the other is `absent` |
+
+---
+
+### WRDL-44 - Win condition
+
+Tests that a correct guess produces all `correct` statuses across every tile.
+
+| # | Test Case | Expected Result |
+|---|---|---|
+| 44.1 | Guess exactly matches target | All tiles return `status: 'correct'` |
+
+---
+
+### WRDL-45 - Loss condition
+
+Tests that 6 wrong guesses produces no `correct` tiles for a fully incorrect guess.
+
+| # | Test Case | Expected Result |
+|---|---|---|
+| 45.1 | Guess shares no letters with target | All tiles return `status: 'absent'` |
+
+---
+
+## Functions Under Test
+
+| Function | File | What it does |
+|---|---|---|
+| `isGuessTooShort` | `gameLogic.js` | Returns `true` if guess length is less than wordLength |
+| `checkGuess` | `gameLogic.js` | Compares guess to target and returns array of `{ letter, status }` objects |
 
 ---
 
 ## Tools
 
-- **Framework:** Cypress v15
-- **Browser:** Chrome
-- **Dev Server:** Vite (http://localhost:5173)
+- **Framework:** Vitest v4.1.9
+- **Test file:** `src/gameLogic.test.js`
+- **Run command:** `npm test`
