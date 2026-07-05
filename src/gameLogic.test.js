@@ -57,4 +57,38 @@ describe( 'checkGuess', () => {
 
     } )
 
+    // Test case for checkGuess function when wrong letter is guessed
+    it( 'returns absent for wrong letter', () => {
+
+        const guess = 'DOG'
+        const target = 'CAT'
+        const expected = [
+
+            { letter: 'D', status: 'absent' },
+            { letter: 'O', status: 'absent' },
+            { letter: 'G', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+    
+    // Test case for checkGuess function when guess has mixed correct, present, and absent letters
+    it( 'returns correct, present, and absent for mixed guess', () => {
+
+        const guess = 'COT'
+        const target = 'CAT'
+        const expected = [
+
+            { letter: 'C', status: 'correct' },
+            { letter: 'O', status: 'absent' },
+            { letter: 'T', status: 'correct' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
 } )
