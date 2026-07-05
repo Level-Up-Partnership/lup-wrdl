@@ -53,3 +53,19 @@ export const checkGuess = ( guess, target ) => {
   return result
 
 }
+
+/**
+ * 
+ * Checks if a guess is too short based on the target word length.
+ * 
+ * @param { string } guess - The player's guessed word.
+ * @param { number } wordLength - The length of the target word.
+ * @returns { boolean } - True if the guess is too short, false otherwise.
+ * 
+ */
+
+export const isGuessTooShort = ( guess, wordLength ) => {
+
+    return guess.length < wordLength
+
+}
