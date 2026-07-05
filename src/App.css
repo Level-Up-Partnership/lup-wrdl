@@ -193,10 +193,25 @@ body {
 
 }
 
-.key.absent {
+/* Key statuses */
+.key.absent { /* Absent letters are not in the word */
 
   background: #1a1a1b;
   color: #3a3a3c;
+
+}
+
+.key.correct { /* Correct letters are in the correct position */
+
+  background: #538d4e;
+  color: #fff;
+
+}
+
+.key.present { /* Present letters are in the word but in the wrong position */
+
+  background: #b59f3b;
+  color: #fff;
 
 }
 
