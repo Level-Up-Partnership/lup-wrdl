@@ -110,4 +110,43 @@ describe( 'checkGuess', () => {
 
     } )
 
+    // WRDL-44: Test win condition - correct guess triggers victory
+    it( 'returns all correct for a winning guess', () => {
+
+        const guess = 'BLADE'
+        const target = 'BLADE'
+        const expected = [
+
+            { letter: 'B', status: 'correct' },
+            { letter: 'L', status: 'correct' },
+            { letter: 'A', status: 'correct' },
+            { letter: 'D', status: 'correct' },
+            { letter: 'E', status: 'correct' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-45: Test loss condition - 6 wrong guesses triggers defeat
+    // True loss condition (6 wrong guesses) lives in App.jsx
+    it( 'returns all absent for a losing guess', () => {
+
+        const guess = 'MYRRH'
+        const target = 'BLADE'
+        const expected = [
+
+            { letter: 'M', status: 'absent' },
+            { letter: 'Y', status: 'absent' },
+            { letter: 'R', status: 'absent' },
+            { letter: 'R', status: 'absent' },
+            { letter: 'H', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
 } )
