@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { checkGuess, isGuessTooShort } from './gameLogic'
 
+
 // WRDL-39: Test that a guess shorter than wordLength is rejected
 describe( 'isGuessTooShort', () => {
 
@@ -21,10 +22,10 @@ describe( 'isGuessTooShort', () => {
 } )
 
 
-//WRDL-40: Test checkGuess returns correct for right letter in right position
+// Tests for checkGuess function
 describe( 'checkGuess', () => {
 
-    // Test cases for checkGuess function
+    // WRDL-40: Test checkGuess returns correct for right letter in right position
     it( 'returns correct for right letter in right position', () => {
 
         const guess = 'CAT'
@@ -40,7 +41,7 @@ describe( 'checkGuess', () => {
 
     } )
 
-    // Test case for checkGuess function when right letter is in wrong position
+    // WRDL-41: Test checkGuess returns present for right letter in wrong position
     it( 'returns present for right letter in wrong position', () => {
 
         const guess = 'TAC'
@@ -57,7 +58,7 @@ describe( 'checkGuess', () => {
 
     } )
 
-    // Test case for checkGuess function when wrong letter is guessed
+    // WRDL-42: Test checkGuess returns absent for letter not in word
     it( 'returns absent for wrong letter', () => {
 
         const guess = 'DOG'
@@ -73,7 +74,7 @@ describe( 'checkGuess', () => {
         expect( checkGuess( guess, target ) ).toEqual( expected )
 
     } )
-    
+
     // Test case for checkGuess function when guess has mixed correct, present, and absent letters
     it( 'returns correct, present, and absent for mixed guess', () => {
 
@@ -84,6 +85,24 @@ describe( 'checkGuess', () => {
             { letter: 'C', status: 'correct' },
             { letter: 'O', status: 'absent' },
             { letter: 'T', status: 'correct' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-43: Test checkGuess returns correct, present, and absent for guess with repeated letters
+    it( 'returns correct, present, and absent for guess with repeated letters', () => {
+
+        const guess = 'BASS'
+        const target = 'SOIL'
+        const expected = [
+
+            { letter: 'B', status: 'absent' },
+            { letter: 'A', status: 'absent' },
+            { letter: 'S', status: 'present' },
+            { letter: 'S', status: 'absent' }
 
         ]
 
