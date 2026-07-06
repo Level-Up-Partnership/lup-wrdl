@@ -159,4 +159,23 @@ describe( 'checkGuess', () => {
 
     } )
 
+    // WRDL-48: Test checkGuess returns absent for duplicate letter when target only has one instance
+    it( 'returns absent for second occurrence of a letter when target only has one instance', () => {
+
+        const guess = 'MEETS'
+        const target = 'MEDAL'
+        const expected = [
+
+            { letter: 'M', status: 'correct' },
+            { letter: 'E', status: 'correct' },
+            { letter: 'E', status: 'absent' },
+            { letter: 'T', status: 'absent' },
+            { letter: 'S', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
 } )
