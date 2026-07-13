@@ -148,6 +148,29 @@ function App() {
   const MAX_GUESSES = 6
 
 
+  // On mount - check for a saved session and restore it if it exists
+  useEffect( () => {
+
+    const session = loadSession()
+
+    // Restore session if it was mid-game
+    if ( session && session.gameStatus === "playing" ) {
+
+      setWord( session.word )
+      setGuesses( session.guesses )
+      setWordLength( session.wordLength )
+      setGameStatus( session.gameStatus )
+      setScreen( "game" )
+
+    } else if ( session ) { // If the session is completed (won/lost), clear it to avoid resuming a finished game
+
+      clearSession() // Clear any invalid or completed session
+
+    }
+
+  }, [] ) // Empty array - runs only once on mount
+
+
   /**
    * 
    * Checks whether a word exists using the Free Dictionary API.
