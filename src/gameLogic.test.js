@@ -178,4 +178,23 @@ describe( 'checkGuess', () => {
 
     } )
 
+    // WRDL-49: Test checkGuess when target has duplicate letters and guess has one instance
+    it( 'returns correct for single occurrence of a letter when target has duplicates', () => {
+
+        const guess = 'SASSY'
+        const target = 'BLAST'
+        const expected = [
+
+            { letter: 'S', status: 'absent' },
+            { letter: 'A', status: 'present' },
+            { letter: 'S', status: 'absent' },
+            { letter: 'S', status: 'correct' },
+            { letter: 'Y', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
 } )
