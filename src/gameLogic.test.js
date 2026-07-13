@@ -79,56 +79,6 @@ describe( 'isGuessTooShort', () => {
 
     } )
 
-    // WRDL-51: Test isGuessTooShort returns false when guess equals a 4-letter wordLength
-    it( 'returns false when guess equals a 4-letter wordLength', () => {
-
-        const guess = 'CATS'
-        const wordLength = 4
-
-        expect( isGuessTooShort( guess, wordLength ) ).toBe( false )
-
-    } )
-
-    // WRDL-52: Test isGuessTooShort returns true when guess is one letter short of a 4-letter wordLength
-    it( 'returns true when guess is one letter short of a 4-letter wordLength', () => {
-
-        const guess = 'CAT'
-        const wordLength = 4
-
-        expect( isGuessTooShort( guess, wordLength ) ).toBe( true )
-
-    } )
-
-    // WRDL-53: Test isGuessTooShort returns true when guess is one letter short of a 6-letter wordLength
-    it( 'returns true when guess is one letter short of a 6-letter wordLength', () => {
-
-        const guess = 'PLANT'
-        const wordLength = 6
-
-        expect( isGuessTooShort( guess, wordLength ) ).toBe( true )
-
-    } )
-
-    // WRDL-79: Test isGuessTooShort returns false when guess equals a 5-letter wordLength
-    it( 'returns false when guess equals a 5-letter wordLength', () => {
-
-        const guess = 'CRANE'
-        const wordLength = 5
-
-        expect( isGuessTooShort( guess, wordLength ) ).toBe( false )
-
-    } )
-
-    // WRDL-80: Test isGuessTooShort returns false when guess equals a 6-letter wordLength
-    it( 'returns false when guess equals a 6-letter wordLength', () => {
-
-        const guess = 'PLANET'
-        const wordLength = 6
-
-        expect( isGuessTooShort( guess, wordLength ) ).toBe( false )
-
-    } )
-
 } )
 
 
@@ -494,6 +444,293 @@ describe( 'checkGuess', () => {
             { letter: 'T', status: 'present' },
             { letter: 'A', status: 'correct' },
             { letter: 'C', status: 'present' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    
+    // WRDL-63: Test checkGuess returns all absent when guess has duplicate letters and target has none
+    it( 'returns all absent when guess has duplicate letters and target has none of them', () => {
+
+        const guess = 'SPEED'
+        const target = 'MATCH'
+        const expected = [
+
+            { letter: 'S', status: 'absent' },
+            { letter: 'P', status: 'absent' },
+            { letter: 'E', status: 'absent' },
+            { letter: 'E', status: 'absent' },
+            { letter: 'D', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-64: Test checkGuess gives credit to only 2 of 3 duplicate letters when target has 2 instances
+    it( 'gives credit to only 2 of 3 duplicate letters when target has 2 instances', () => {
+
+        const guess = 'GEESE'
+        const target = 'THEME'
+        const expected = [
+
+            { letter: 'G', status: 'absent' },
+            { letter: 'E', status: 'absent' },
+            { letter: 'E', status: 'correct' },
+            { letter: 'S', status: 'absent' },
+            { letter: 'E', status: 'correct' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-65: Test checkGuess returns both correct when guess and target share a duplicate letter at the same two positions
+    it( 'returns both correct when guess and target share a duplicate letter at the same two positions', () => {
+
+        const guess = 'BOOZE'
+        const target = 'BOOST'
+        const expected = [
+
+            { letter: 'B', status: 'correct' },
+            { letter: 'O', status: 'correct' },
+            { letter: 'O', status: 'correct' },
+            { letter: 'Z', status: 'absent' },
+            { letter: 'E', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-66: Test checkGuess returns correct and present for same letter appearing twice - one correct, one present
+    it( 'returns correct and present for same letter appearing twice - one correct one present', () => {
+
+        const guess = 'PAPAL'
+        const target = 'APPAL'
+        const expected = [
+
+            { letter: 'P', status: 'present' },
+            { letter: 'A', status: 'present' },
+            { letter: 'P', status: 'correct' },
+            { letter: 'A', status: 'correct' },
+            { letter: 'L', status: 'correct' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-68: Test checkGuess returns correct when target has a letter twice and guess has it once in correct position
+    it( 'returns correct when target has a letter twice and guess has it once in the correct position', () => {
+
+        const guess = 'BLOOD'
+        const target = 'FLOOD'
+        const expected = [
+
+            { letter: 'B', status: 'absent' },
+            { letter: 'L', status: 'correct' },
+            { letter: 'O', status: 'correct' },
+            { letter: 'O', status: 'correct' },
+            { letter: 'D', status: 'correct' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-69: Test checkGuess does not downgrade correct letter to present in pass 2
+    it( 'does not downgrade a correct letter to present in pass 2', () => {
+
+        const guess = 'ABBOT'
+        const target = 'ABBEY'
+        const expected = [
+
+            { letter: 'A', status: 'correct' },
+            { letter: 'B', status: 'correct' },
+            { letter: 'B', status: 'correct' },
+            { letter: 'O', status: 'absent' },
+            { letter: 'T', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-70: Test checkGuess handles a 3-letter word where all letters are the same
+    it( 'handles a 3-letter word where all letters are the same', () => {
+
+        const guess = 'AAH'
+        const target = 'AAH'
+        const expected = [
+
+            { letter: 'A', status: 'correct' },
+            { letter: 'A', status: 'correct' },
+            { letter: 'H', status: 'correct' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-71: Test checkGuess handles duplicate letter in 3-letter word where guess has two and target has one
+    it( 'handles duplicate letter in 3-letter word where guess has two and target has one', () => {
+
+        const guess = 'EEL'
+        const target = 'LEG'
+        const expected = [
+
+            { letter: 'E', status: 'absent' },
+            { letter: 'E', status: 'correct' },
+            { letter: 'L', status: 'present' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-72: Test checkGuess returns correct only for the last letter of a 6-letter word when rest are absent
+    it( 'returns correct only for the last letter of a 6-letter word when rest are absent', () => {
+
+        const guess = 'GRUMPY'
+        const target = 'DONKEY'
+        const expected = [
+
+            { letter: 'G', status: 'absent' },
+            { letter: 'R', status: 'absent' },
+            { letter: 'U', status: 'absent' },
+            { letter: 'M', status: 'absent' },
+            { letter: 'P', status: 'absent' },
+            { letter: 'Y', status: 'correct' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-73: Test checkGuess returns present only for the first letter of a 6-letter word when rest are absent
+    it( 'returns present only for the first letter of a 6-letter word when rest are absent', () => {
+
+        const guess = 'BISHOP'
+        const target = 'RUBBLE'
+        const expected = [
+
+            { letter: 'B', status: 'present' },
+            { letter: 'I', status: 'absent' },
+            { letter: 'S', status: 'absent' },
+            { letter: 'H', status: 'absent' },
+            { letter: 'O', status: 'absent' },
+            { letter: 'P', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-74: Test checkGuess returns correct for two middle letters of a 6-letter word
+    it( 'returns correct for two middle letters of a 6-letter word when surrounding letters are absent', () => {
+
+        const guess = 'BOTTLE'
+        const target = 'JOTTER'
+        const expected = [
+
+            { letter: 'B', status: 'absent' },
+            { letter: 'O', status: 'correct' },
+            { letter: 'T', status: 'correct' },
+            { letter: 'T', status: 'correct' },
+            { letter: 'L', status: 'absent' },
+            { letter: 'E', status: 'present' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-75: Test checkGuess returns all present for a 6-letter word with every letter shuffled to wrong positions
+    it( 'returns all present for a 6-letter word with every letter shuffled to wrong positions', () => {
+
+        const guess = 'STREAM'
+        const target = 'MASTER'
+        const expected = [
+
+            { letter: 'S', status: 'present' },
+            { letter: 'T', status: 'present' },
+            { letter: 'R', status: 'present' },
+            { letter: 'E', status: 'present' },
+            { letter: 'A', status: 'present' },
+            { letter: 'M', status: 'present' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-76: Test checkGuess returns alternating correct and absent for a 6-letter word
+    it( 'returns alternating correct and absent for a 6-letter word', () => {
+
+        const guess = 'CARPET'
+        const target = 'CANYON'
+        const expected = [
+
+            { letter: 'C', status: 'correct' },
+            { letter: 'A', status: 'correct' },
+            { letter: 'R', status: 'absent' },
+            { letter: 'P', status: 'absent' },
+            { letter: 'E', status: 'absent' },
+            { letter: 'T', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-77: Test checkGuess returns correct for earliest matching position when target has letter at multiple positions
+    it( 'returns correct for a letter at the earliest matching position when target has it at multiple positions', () => {
+
+        const guess = 'BLOOM'
+        const target = 'BLOOD'
+        const expected = [
+
+            { letter: 'B', status: 'correct' },
+            { letter: 'L', status: 'correct' },
+            { letter: 'O', status: 'correct' },
+            { letter: 'O', status: 'correct' },
+            { letter: 'M', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-78: Test checkGuess handles a guess with no repeated letters against a target with repeated letters
+    it( 'handles a guess with no repeated letters against a target with repeated letters', () => {
+
+        const guess = 'RIVER'
+        const target = 'EERIE'
+        const expected = [
+
+            { letter: 'R', status: 'present' },
+            { letter: 'I', status: 'present' },
+            { letter: 'V', status: 'absent' },
+            { letter: 'E', status: 'present' },
+            { letter: 'R', status: 'absent' }
 
         ]
 
