@@ -283,4 +283,172 @@ describe( 'checkGuess', () => {
 
     } )
 
+    // WRDL-54: Test checkGuess returns all present when all letters exist in target but none in correct position - 3-letter
+    it( 'returns all present when all letters exist in target but none in correct position - 3-letter', () => {
+
+        const guess = 'ATE'
+        const target = 'EAT'
+        const expected = [
+
+            { letter: 'A', status: 'present' },
+            { letter: 'T', status: 'present' },
+            { letter: 'E', status: 'present' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-55: Test checkGuess returns all present when all letters exist in target but none in correct position - 6-letter
+    it( 'returns mixed correct and present for 6-letter words', () => {
+
+        const guess = 'LUSTER'
+        const target = 'RUSTLE'
+        const expected = [
+
+            { letter: 'L', status: 'present' },
+            { letter: 'U', status: 'correct' },
+            { letter: 'S', status: 'correct' },
+            { letter: 'T', status: 'correct' },
+            { letter: 'E', status: 'present' },
+            { letter: 'R', status: 'present' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-56: Test checkGuess returns mixed correct and present with no absent letters
+    it( 'returns mixed correct and present with no absent letters', () => {
+
+        const guess = 'STEAM'
+        const target = 'TEAMS'
+        const expected = [
+
+            { letter: 'S', status: 'present' },
+            { letter: 'T', status: 'present' },
+            { letter: 'E', status: 'present' },
+            { letter: 'A', status: 'present' },
+            { letter: 'M', status: 'present' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-57: Test checkGuess returns correct only for the first letter when rest are absent
+    it( 'returns correct only for the first letter when rest are absent', () => {
+
+        const guess = 'CRANE'
+        const target = 'CLUBS'
+        const expected = [
+
+            { letter: 'C', status: 'correct' },
+            { letter: 'R', status: 'absent' },
+            { letter: 'A', status: 'absent' },
+            { letter: 'N', status: 'absent' },
+            { letter: 'E', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-58: Test checkGuess returns correct only for the last letter when rest are absent
+    it( 'returns correct only for the last two letters when rest are absent', () => {
+
+        const guess = 'CRANE'
+        const target = 'STONE'
+        const expected = [
+
+            { letter: 'C', status: 'absent' },
+            { letter: 'R', status: 'absent' },
+            { letter: 'A', status: 'absent' },
+            { letter: 'N', status: 'correct' },
+            { letter: 'E', status: 'correct' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-59: Test checkGuess returns correct only for a middle letter when surrounding letters are absent
+    it( 'returns correct only for a middle letter when surrounding letters are absent', () => {
+
+        const guess = 'BLIMP'
+        const target = 'FLICK'
+        const expected = [
+
+            { letter: 'B', status: 'absent' },
+            { letter: 'L', status: 'correct' },
+            { letter: 'I', status: 'correct' },
+            { letter: 'M', status: 'absent' },
+            { letter: 'P', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-60: Test checkGuess returns correct for a single letter surrounded by absent letters
+    it( 'returns correct for a single letter surrounded by absent letters', () => {
+
+        const guess = 'GRUFF'
+        const target = 'CRANE'
+        const expected = [
+
+            { letter: 'G', status: 'absent' },
+            { letter: 'R', status: 'correct' },
+            { letter: 'U', status: 'absent' },
+            { letter: 'F', status: 'absent' },
+            { letter: 'F', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-61: Test checkGuess returns correct for a letter appearing at both the start and end of the word
+    it( 'returns correct for a letter appearing at both the start and end of the word', () => {
+
+        const guess = 'EXTRA'
+        const target = 'EXTRA'
+        const expected = [
+
+            { letter: 'E', status: 'correct' },
+            { letter: 'X', status: 'correct' },
+            { letter: 'T', status: 'correct' },
+            { letter: 'R', status: 'correct' },
+            { letter: 'A', status: 'correct' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    // WRDL-62: Test checkGuess returns all present for letters in completely reversed order
+    it( 'returns all present for letters in completely reversed order', () => {
+
+        const guess = 'TAC'
+        const target = 'CAT'
+        const expected = [
+
+            { letter: 'T', status: 'present' },
+            { letter: 'A', status: 'correct' },
+            { letter: 'C', status: 'present' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
 } )
