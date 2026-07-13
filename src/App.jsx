@@ -80,6 +80,49 @@ const clearSession = () => {
 
 }
 
+/**
+ * 
+ * Loads the list of previously used words from localStorage, if it exists.
+ * 
+ * @returns { Array } - An array of previously used words, or an empty array if none exist.
+ * 
+ */
+
+const loadUsedWords = () => {
+
+  // Load the list of used words from localStorage, if it exists
+  try {
+
+    const saved = localStorage.getItem( STORAGE_KEY_USED_WORDS )
+    return saved ? JSON.parse( saved ) : []
+
+  } catch { // If parsing fails, return an empty array to indicate no used words
+
+    return []
+
+  }
+
+}
+
+/**
+ * 
+ * Adds a word to the list of previously used words in localStorage.
+ * Trims the list to MAX_USED_WORDS to avoid excessive growth.
+ * 
+ * @param { string } word - The word to add.
+ * 
+ */
+
+const addUsedWord = ( word ) => {
+
+  const usedWords = loadUsedWords()
+
+  // Add the new word to the list and keep only the last MAX_USED_WORDS words
+  const updated = [ ...usedWords, word ].slice( -MAX_USED_WORDS ) // Keep only the last MAX_USED_WORDS words
+  localStorage.setItem( STORAGE_KEY_USED_WORDS, JSON.stringify( updated ) )
+
+}
+
 
 /**
  * 
@@ -196,7 +239,8 @@ function App() {
 
       // Check win condition
       if ( currentGuess === word ) {
-
+        
+        addUsedWord( currentGuess )
         setGameStatus( "won" )
         setTimeout( () => setScreen( "victory" ), 1000 ) // brief delay so player sees the result
 
