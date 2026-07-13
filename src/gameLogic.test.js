@@ -197,4 +197,40 @@ describe( 'checkGuess', () => {
 
     } )
 
+    // WRDL-50: Test checkGuess returns correct results for 3-letter and 6-letter words
+    it( 'returns correct results for 3-letter words', () => {
+
+        const guess = 'TAD'
+        const target = 'RAT'
+        const expected = [
+
+            { letter: 'T', status: 'present' },
+            { letter: 'A', status: 'correct' },
+            { letter: 'D', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
+    it( 'returns correct results for 6-letter words', () => {
+
+        const guess = 'PLANET'
+        const target = 'LANCER'
+        const expected = [
+
+            { letter: 'P', status: 'absent' },
+            { letter: 'L', status: 'present' },
+            { letter: 'A', status: 'present' },
+            { letter: 'N', status: 'present' },
+            { letter: 'E', status: 'correct' },
+            { letter: 'T', status: 'absent' }
+
+        ]
+
+        expect( checkGuess( guess, target ) ).toEqual( expected )
+
+    } )
+
 } )
