@@ -403,6 +403,7 @@ function App() {
 
   const goToMenu = () => {
 
+    clearSession() // Clear any saved session when returning to menu
     setScreen( "menu" )
     setGuesses( [] )
     setCurrentGuess( "" )
