@@ -6,6 +6,7 @@ import Defeat from './components/Defeat'
 import './App.css'
 import { checkGuess, isGuessTooShort } from './gameLogic'
 
+
 /* Temporary word bank for demo purposes - replace with API fetch
 const DEMO_WORDS = {
 
@@ -15,6 +16,112 @@ const DEMO_WORDS = {
   6: [ "PLEASE", "BOLTED", "SPRINT" ],
   
 } */
+
+
+// localStorage keys
+const STORAGE_KEY_SESSION = "wrdl_session"
+const STORAGE_KEY_USED_WORDS = "wrdl_used_words"
+
+// Maximum number of words to keep in the used words list to avoid repetition
+const MAX_USED_WORDS = 50
+
+
+/**
+ * 
+ * Saves the current game session to localStorage.
+ * 
+ * @param { string } word - The current target word.
+ * @param { Array } guesses - The submitted guesses so far.
+ * @param { number } wordLength - The current word length.
+ * @param { string } gameStatus - The current game status ("playing", "won", "lost").
+ * 
+ */
+
+const saveSession = ( word, guesses, wordLength, gameStatus ) => {
+
+  const session = { word, guesses, wordLength, gameStatus }
+  localStorage.setItem( STORAGE_KEY_SESSION, JSON.stringify( session ) )
+
+}
+
+/**
+ * 
+ * Loads a saved game session from localStorage, if it exists.
+ * 
+ * @returns { object|null } - The saved session object, or null if none exists.
+ * 
+ */
+
+const loadSession = () => {
+
+  // Load the saved game session from localStorage, if it exists
+  try {
+
+    const saved = localStorage.getItem( STORAGE_KEY_SESSION )
+    return saved ? JSON.parse( saved ) : null
+
+  } catch { // If parsing fails, return null to indicate no valid session
+
+    return null
+
+  }
+
+}
+
+/**
+ * 
+ * Clears the saved game session from localStorage.
+ * 
+ */
+
+const clearSession = () => {
+
+  localStorage.removeItem( STORAGE_KEY_SESSION )
+
+}
+
+/**
+ * 
+ * Loads the list of previously used words from localStorage, if it exists.
+ * 
+ * @returns { Array } - An array of previously used words, or an empty array if none exist.
+ * 
+ */
+
+const loadUsedWords = () => {
+
+  // Load the list of used words from localStorage, if it exists
+  try {
+
+    const saved = localStorage.getItem( STORAGE_KEY_USED_WORDS )
+    return saved ? JSON.parse( saved ) : []
+
+  } catch { // If parsing fails, return an empty array to indicate no used words
+
+    return []
+
+  }
+
+}
+
+/**
+ * 
+ * Adds a word to the list of previously used words in localStorage.
+ * Trims the list to MAX_USED_WORDS to avoid excessive growth.
+ * 
+ * @param { string } word - The word to add.
+ * 
+ */
+
+const addUsedWord = ( word ) => {
+
+  const usedWords = loadUsedWords()
+
+  // Add the new word to the list and keep only the last MAX_USED_WORDS words
+  const updated = [ ...usedWords, word ].slice( -MAX_USED_WORDS ) // Keep only the last MAX_USED_WORDS words
+  localStorage.setItem( STORAGE_KEY_USED_WORDS, JSON.stringify( updated ) )
+
+}
 
 
 /**
@@ -39,6 +146,29 @@ function App() {
 
   // Build the full board - submitted guesses plus empty rows to fill up to 6
   const MAX_GUESSES = 6
+
+
+  // On mount - check for a saved session and restore it if it exists
+  useEffect( () => {
+
+    const session = loadSession()
+
+    // Restore session if it was mid-game
+    if ( session && session.gameStatus === "playing" ) {
+
+      setWord( session.word )
+      setGuesses( session.guesses )
+      setWordLength( session.wordLength )
+      setGameStatus( session.gameStatus )
+      setScreen( "game" )
+
+    } else if ( session ) { // If the session is completed (won/lost), clear it to avoid resuming a finished game
+
+      clearSession() // Clear any invalid or completed session
+
+    }
+
+  }, [] ) // Empty array - runs only once on mount
 
 
   /**
@@ -90,67 +220,74 @@ function App() {
     // Handles Backspace: remove last character from current guess
     if ( key === "BACKSPACE" ) {
 
-      setCurrentGuess( ( prev ) => prev.slice( 0, -1 ) )
+        setCurrentGuess( ( prev ) => prev.slice( 0, -1 ) )
 
     } else if ( key === "ENTER" ) { // Handles Enter: submit the guess if it's long enough
 
-      // Ignore if the guess is too short
-      if ( isGuessTooShort( currentGuess, wordLength ) ) return
+        // Ignore if the guess is too short
+        if ( isGuessTooShort( currentGuess, wordLength ) ) return
 
-      // Validate the guess against the dictionary API
-      const result = await isValidWord( currentGuess )
+        // Validate the guess against the dictionary API
+        const result = await isValidWord( currentGuess )
 
-      // Reject if the word is not valid
-      if ( !result.valid ) {
+        // Reject if the word is not valid
+        if ( !result.valid ) {
 
-        // Set error message based on the reason for invalidity
-        if ( result.reason === "networkError" ) {
+            // Set error message based on the reason for invalidity
+            if ( result.reason === "networkError" ) {
 
-          setErrorMessage( "Connection error — please try again" )
+                setErrorMessage( "Connection error - please try again" )
 
-        } else {
+            } else {
 
-          setErrorMessage( "Not a valid word" )
+                setErrorMessage( "Not a valid word" )
+
+            }
+
+            return
 
         }
 
-        return
+        // Clear error message on valid guess
+        setErrorMessage( "" )
 
-      }
+        // Check the guess against the target word
+        const checkedGuess = checkGuess( currentGuess, word )
+        const newGuesses = [ ...guesses, checkedGuess ]
 
-      // Clear error message on valid guess
-      setErrorMessage( "" )
+        // Add checked guess to submitted guesses
+        setGuesses( newGuesses )
 
-      // Check the guess against the target word
-      const checkedGuess = checkGuess( currentGuess, word )
+        // Clear current guess
+        setCurrentGuess( "" )
 
-      // Add checked guess to submitted guesses
-      setGuesses( ( prev ) => [ ...prev, checkedGuess ] )
+        // Check win condition
+        if ( currentGuess === word ) {
 
-      // Clear current guess
-      setCurrentGuess( "" )
+            setGameStatus( "won" )
+            saveSession( word, newGuesses, wordLength, "won" )
+            setTimeout( () => setScreen( "victory" ), 1000 ) // brief delay so player sees the result
 
-      // Check win condition
-      if ( currentGuess === word ) {
+        // Check loss condition
+        } else if ( newGuesses.length >= MAX_GUESSES ) {
 
-        setGameStatus( "won" )
-        setTimeout( () => setScreen( "victory" ), 1000 ) // brief delay so player sees the result
+            setGameStatus( "lost" )
+            saveSession( word, newGuesses, wordLength, "lost" )
+            setTimeout( () => setScreen( "defeat" ), 1000 ) // brief delay so player sees the result
 
-      // Check loss condition
-      } else if ( guesses.length + 1 >= MAX_GUESSES ) {
+        } else { // Game still in progress - save updated state
 
-        setGameStatus( "lost" )
-        setTimeout( () => setScreen( "defeat" ), 1000 ) // brief delay so player sees the result
+            saveSession( word, newGuesses, wordLength, "playing" )
 
-      }
+        }
 
-    } else if ( currentGuess.length < wordLength && /^[A-Z]$/.test( key ) ) { // Handles letter keys: add to current guess if there's room and it's a valid letter
+    } else if ( currentGuess.length < wordLength && /^[A-Z]$/.test( key ) ) { // Handles letter keys
 
-      setCurrentGuess( ( prev ) => prev + key )
+        setCurrentGuess( ( prev ) => prev + key )
 
     }
 
-  }, [ gameStatus, currentGuess, wordLength ] ) // Re-create only when these change
+}, [ gameStatus, currentGuess, wordLength, guesses, word ] ) // Re-create only when these change
 
   // Add event listener for physical keyboard input
   useEffect( () => {
@@ -222,25 +359,41 @@ function App() {
     // Tries to fetch a random word from the API based on the selected word length
     try {
 
-      // Fetch a random word from the API based on selected word length
-      const response = await fetch( `https://random-word-api.herokuapp.com/word?length=${ wordLength }` )
-      const data = await response.json()
-      const randomWord = data[0].toUpperCase()
+        const usedWords = loadUsedWords()
+        let randomWord = ""
+        let attempts = 0
+        const MAX_ATTEMPTS = 5 // Cap retries to avoid infinite loops
 
-      setGuesses( [] )
-      setCurrentGuess( "" )
-      setGameStatus( "playing" )
-      setErrorMessage( "" )
-      setWord( randomWord )
-      setScreen( "game" )
+        // Keep fetching until we get an unused word or hit the retry cap
+        do {
+
+            const response = await fetch( `https://random-word-api.herokuapp.com/word?length=${ wordLength }` )
+            const data = await response.json()
+            randomWord = data[0].toUpperCase()
+            attempts++
+
+        } while ( usedWords.includes( randomWord ) && attempts < MAX_ATTEMPTS )
+
+        // Add the new word to the used words list
+        addUsedWord( randomWord )
+
+        setGuesses( [] )
+        setCurrentGuess( "" )
+        setGameStatus( "playing" )
+        setErrorMessage( "" )
+        setWord( randomWord )
+        setScreen( "game" )
+
+        // Save the fresh session immediately on game start
+        saveSession( randomWord, [], wordLength, "playing" )
 
     } catch ( error ) { // Handle fetch error gracefully
 
-      console.error( "Failed to fetch word:", error )
+        console.error( "Failed to fetch word:", error )
 
     }
 
-  }
+}
 
   /**
    * 
@@ -250,6 +403,7 @@ function App() {
 
   const goToMenu = () => {
 
+    clearSession() // Clear any saved session when returning to menu
     setScreen( "menu" )
     setGuesses( [] )
     setCurrentGuess( "" )
