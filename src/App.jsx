@@ -44,6 +44,30 @@ const saveSession = ( word, guesses, wordLength, gameStatus ) => {
 
 }
 
+/**
+ * 
+ * Loads a saved game session from localStorage, if it exists.
+ * 
+ * @returns { object|null } - The saved session object, or null if none exists.
+ * 
+ */
+
+const loadSession = () => {
+
+  // Load the saved game session from localStorage, if it exists
+  try {
+
+    const saved = localStorage.getItem( STORAGE_KEY_SESSION )
+    return saved ? JSON.parse( saved ) : null
+
+  } catch { // If parsing fails, return null to indicate no valid session
+
+    return null
+
+  }
+
+}
+
 
 /**
  * 
