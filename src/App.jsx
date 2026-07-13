@@ -220,68 +220,74 @@ function App() {
     // Handles Backspace: remove last character from current guess
     if ( key === "BACKSPACE" ) {
 
-      setCurrentGuess( ( prev ) => prev.slice( 0, -1 ) )
+        setCurrentGuess( ( prev ) => prev.slice( 0, -1 ) )
 
     } else if ( key === "ENTER" ) { // Handles Enter: submit the guess if it's long enough
 
-      // Ignore if the guess is too short
-      if ( isGuessTooShort( currentGuess, wordLength ) ) return
+        // Ignore if the guess is too short
+        if ( isGuessTooShort( currentGuess, wordLength ) ) return
 
-      // Validate the guess against the dictionary API
-      const result = await isValidWord( currentGuess )
+        // Validate the guess against the dictionary API
+        const result = await isValidWord( currentGuess )
 
-      // Reject if the word is not valid
-      if ( !result.valid ) {
+        // Reject if the word is not valid
+        if ( !result.valid ) {
 
-        // Set error message based on the reason for invalidity
-        if ( result.reason === "networkError" ) {
+            // Set error message based on the reason for invalidity
+            if ( result.reason === "networkError" ) {
 
-          setErrorMessage( "Connection error — please try again" )
+                setErrorMessage( "Connection error - please try again" )
 
-        } else {
+            } else {
 
-          setErrorMessage( "Not a valid word" )
+                setErrorMessage( "Not a valid word" )
+
+            }
+
+            return
 
         }
 
-        return
+        // Clear error message on valid guess
+        setErrorMessage( "" )
 
-      }
+        // Check the guess against the target word
+        const checkedGuess = checkGuess( currentGuess, word )
+        const newGuesses = [ ...guesses, checkedGuess ]
 
-      // Clear error message on valid guess
-      setErrorMessage( "" )
+        // Add checked guess to submitted guesses
+        setGuesses( newGuesses )
 
-      // Check the guess against the target word
-      const checkedGuess = checkGuess( currentGuess, word )
+        // Clear current guess
+        setCurrentGuess( "" )
 
-      // Add checked guess to submitted guesses
-      setGuesses( ( prev ) => [ ...prev, checkedGuess ] )
+        // Check win condition
+        if ( currentGuess === word ) {
 
-      // Clear current guess
-      setCurrentGuess( "" )
+            setGameStatus( "won" )
+            saveSession( word, newGuesses, wordLength, "won" )
+            setTimeout( () => setScreen( "victory" ), 1000 ) // brief delay so player sees the result
 
-      // Check win condition
-      if ( currentGuess === word ) {
-        
-        addUsedWord( currentGuess )
-        setGameStatus( "won" )
-        setTimeout( () => setScreen( "victory" ), 1000 ) // brief delay so player sees the result
+        // Check loss condition
+        } else if ( newGuesses.length >= MAX_GUESSES ) {
 
-      // Check loss condition
-      } else if ( guesses.length + 1 >= MAX_GUESSES ) {
+            setGameStatus( "lost" )
+            saveSession( word, newGuesses, wordLength, "lost" )
+            setTimeout( () => setScreen( "defeat" ), 1000 ) // brief delay so player sees the result
 
-        setGameStatus( "lost" )
-        setTimeout( () => setScreen( "defeat" ), 1000 ) // brief delay so player sees the result
+        } else { // Game still in progress - save updated state
 
-      }
+            saveSession( word, newGuesses, wordLength, "playing" )
 
-    } else if ( currentGuess.length < wordLength && /^[A-Z]$/.test( key ) ) { // Handles letter keys: add to current guess if there's room and it's a valid letter
+        }
 
-      setCurrentGuess( ( prev ) => prev + key )
+    } else if ( currentGuess.length < wordLength && /^[A-Z]$/.test( key ) ) { // Handles letter keys
+
+        setCurrentGuess( ( prev ) => prev + key )
 
     }
 
-  }, [ gameStatus, currentGuess, wordLength ] ) // Re-create only when these change
+}, [ gameStatus, currentGuess, wordLength, guesses, word ] ) // Re-create only when these change
 
   // Add event listener for physical keyboard input
   useEffect( () => {
