@@ -19,8 +19,8 @@ const DEMO_WORDS = {
 
 
 // localStorage keys
-const STORAGE_KEY_SESSION = "wrld_session"
-const STORAGE_KEY_USED_WORDS = "wrld_used_words"
+const STORAGE_KEY_SESSION = "wrdl_session"
+const STORAGE_KEY_USED_WORDS = "wrdl_used_words"
 
 // Maximum number of words to keep in the used words list to avoid repetition
 const MAX_USED_WORDS = 50
@@ -359,25 +359,41 @@ function App() {
     // Tries to fetch a random word from the API based on the selected word length
     try {
 
-      // Fetch a random word from the API based on selected word length
-      const response = await fetch( `https://random-word-api.herokuapp.com/word?length=${ wordLength }` )
-      const data = await response.json()
-      const randomWord = data[0].toUpperCase()
+        const usedWords = loadUsedWords()
+        let randomWord = ""
+        let attempts = 0
+        const MAX_ATTEMPTS = 5 // Cap retries to avoid infinite loops
 
-      setGuesses( [] )
-      setCurrentGuess( "" )
-      setGameStatus( "playing" )
-      setErrorMessage( "" )
-      setWord( randomWord )
-      setScreen( "game" )
+        // Keep fetching until we get an unused word or hit the retry cap
+        do {
+
+            const response = await fetch( `https://random-word-api.herokuapp.com/word?length=${ wordLength }` )
+            const data = await response.json()
+            randomWord = data[0].toUpperCase()
+            attempts++
+
+        } while ( usedWords.includes( randomWord ) && attempts < MAX_ATTEMPTS )
+
+        // Add the new word to the used words list
+        addUsedWord( randomWord )
+
+        setGuesses( [] )
+        setCurrentGuess( "" )
+        setGameStatus( "playing" )
+        setErrorMessage( "" )
+        setWord( randomWord )
+        setScreen( "game" )
+
+        // Save the fresh session immediately on game start
+        saveSession( randomWord, [], wordLength, "playing" )
 
     } catch ( error ) { // Handle fetch error gracefully
 
-      console.error( "Failed to fetch word:", error )
+        console.error( "Failed to fetch word:", error )
 
     }
 
-  }
+}
 
   /**
    * 
