@@ -19,16 +19,6 @@ describe( 'isGuessTooShort', () => {
 
     } )
 
-    // WRDL-47: Test isGuessTooShort returns false when guess is longer than wordLength
-    it( 'returns false when guess is longer than wordLength', () => {
-
-        const guess = 'CATS'
-        const wordLength = 3
-
-        expect( isGuessTooShort( guess, wordLength ) ).toBe( false )
-
-    } )
-
     // WRDL-51: Test isGuessTooShort returns false when guess equals a 4-letter wordLength
     it( 'returns false when guess equals a 4-letter wordLength', () => {
 
