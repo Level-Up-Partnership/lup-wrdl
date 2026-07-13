@@ -6,6 +6,7 @@ import Defeat from './components/Defeat'
 import './App.css'
 import { checkGuess, isGuessTooShort } from './gameLogic'
 
+
 /* Temporary word bank for demo purposes - replace with API fetch
 const DEMO_WORDS = {
 
@@ -15,6 +16,33 @@ const DEMO_WORDS = {
   6: [ "PLEASE", "BOLTED", "SPRINT" ],
   
 } */
+
+
+// localStorage keys
+const STORAGE_KEY_SESSION = "wrld_session"
+const STORAGE_KEY_USED_WORDS = "wrld_used_words"
+
+// Maximum number of words to keep in the used words list to avoid repetition
+const MAX_USED_WORDS = 50
+
+
+/**
+ * 
+ * Saves the current game session to localStorage.
+ * 
+ * @param { string } word - The current target word.
+ * @param { Array } guesses - The submitted guesses so far.
+ * @param { number } wordLength - The current word length.
+ * @param { string } gameStatus - The current game status ("playing", "won", "lost").
+ * 
+ */
+
+const saveSession = ( word, guesses, wordLength, gameStatus ) => {
+
+  const session = { word, guesses, wordLength, gameStatus }
+  localStorage.setItem( STORAGE_KEY_SESSION, JSON.stringify( session ) )
+
+}
 
 
 /**
