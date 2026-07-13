@@ -29,6 +29,56 @@ describe( 'isGuessTooShort', () => {
 
     } )
 
+    // WRDL-51: Test isGuessTooShort returns false when guess equals a 4-letter wordLength
+    it( 'returns false when guess equals a 4-letter wordLength', () => {
+
+        const guess = 'CATS'
+        const wordLength = 4
+
+        expect( isGuessTooShort( guess, wordLength ) ).toBe( false )
+
+    } )
+
+    // WRDL-52: Test isGuessTooShort returns true when guess is one letter short of a 4-letter wordLength
+    it( 'returns true when guess is one letter short of a 4-letter wordLength', () => {
+
+        const guess = 'CAT'
+        const wordLength = 4
+
+        expect( isGuessTooShort( guess, wordLength ) ).toBe( true )
+
+    } )
+
+    // WRDL-53: Test isGuessTooShort returns true when guess is one letter short of a 6-letter wordLength
+    it( 'returns true when guess is one letter short of a 6-letter wordLength', () => {
+
+        const guess = 'PLANT'
+        const wordLength = 6
+
+        expect( isGuessTooShort( guess, wordLength ) ).toBe( true )
+
+    } )
+
+    // WRDL-79: Test isGuessTooShort returns false when guess equals a 5-letter wordLength
+    it( 'returns false when guess equals a 5-letter wordLength', () => {
+
+        const guess = 'CRANE'
+        const wordLength = 5
+
+        expect( isGuessTooShort( guess, wordLength ) ).toBe( false )
+
+    } )
+
+    // WRDL-80: Test isGuessTooShort returns false when guess equals a 6-letter wordLength
+    it( 'returns false when guess equals a 6-letter wordLength', () => {
+
+        const guess = 'PLANET'
+        const wordLength = 6
+
+        expect( isGuessTooShort( guess, wordLength ) ).toBe( false )
+
+    } )
+
 } )
 
 
