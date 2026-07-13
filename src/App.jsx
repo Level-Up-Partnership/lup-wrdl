@@ -68,6 +68,18 @@ const loadSession = () => {
 
 }
 
+/**
+ * 
+ * Clears the saved game session from localStorage.
+ * 
+ */
+
+const clearSession = () => {
+
+  localStorage.removeItem( STORAGE_KEY_SESSION )
+
+}
+
 
 /**
  * 
